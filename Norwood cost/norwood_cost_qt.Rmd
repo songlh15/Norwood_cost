@@ -1,0 +1,91 @@
+---
+title: "Cost quantile analysis"
+author: "Lihai"
+date: "3/15/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data preparation
+
+```{r include=FALSE,cache=TRUE,error=FALSE,message=FALSE}
+# install.packages(qrLMM)
+library(data.table)
+library(table1)
+library(sas7bdat)
+library(lqmm)
+# library(qrLMM)
+
+# cost <- fread("M:\\projects\\Lihai\\Jing\\Norwood\\data\\cost302.csv")
+# cost <- read.sas7bdat("H:\\Norwood\\data\\cost302text.sas7bdat", debug=FALSE)
+cost <- read.sas7bdat("M:\\projects\\Lihai\\Jing\\Norwood\\data\\cost302text.sas7bdat", debug=FALSE)
+setDT(cost)
+costdata <- cost[stage<=stagemax,c('blind_id','stage','SHUNTRND','sex','racet','cum_cost','ATRESIAn','insurance')]
+col <- c('racet','insurance','sex')
+costdatas <- costdata[, (col):= lapply(.SD, factor), .SDcols=col]
+str(costdatas)
+attach(costdatas)
+```
+
+
+<!-- Trying using QRLMM packageds to run quantile regression mixed model:  -->
+
+<!-- ```{r dataprepare,cache=TRUE,message=FALSE,error=FALSE} -->
+<!-- treat = c() -->
+<!-- treat[SHUNTRND=="1:MBTS"]=1 -->
+<!-- treat[!SHUNTRND=="1:MBTS"]=2 -->
+
+<!-- y = cum_cost #response -->
+<!-- x = cbind(1,treat,stage) #design matrix for fixed effects -->
+<!-- z = cbind(1,stage) #design matrix for random effects -->
+<!-- #A median regression -->
+<!-- # median_reg = QRLMM(y,x,z,blind_id,MaxIter = 500) -->
+
+<!-- ``` -->
+
+## Modeling
+
+<!-- ### Median regression -->
+
+<!-- ```{r median} -->
+<!-- cost_qt <- QRLMM(y,x,z,blind_id,p=0.5,precision=0.001,MaxIter=100,M=10,cp=0.25, -->
+<!--       beta=NA,sigma=NA,Psi=NA,show.convergence=TRUE,CI=95) -->
+<!-- ``` -->
+
+<!-- ### Including median regression Plots -->
+
+<!-- Here is the graphs -->
+<!-- ```{r plots, echo=FALSE} -->
+<!-- summary(cost_qt) -->
+<!-- ``` -->
+
+<!-- ### 75th Quantile regression -->
+
+<!-- ```{r 75th percentile } -->
+<!-- cost_qt <- QRLMM(y,x,z,blind_id,p=0.75,precision=0.001,MaxIter=100,M=10,cp=0.25, -->
+<!--       beta=NA,sigma=NA,Psi=NA,show.convergence=TRUE,CI=95) -->
+<!-- ``` -->
+
+<!-- ### 90th Quantile regression -->
+
+<!-- ```{r 90th percentil } -->
+<!-- cost_qt <- QRLMM(y,x,z,blind_id,p=0.9,precision=0.001,MaxIter=100,M=10,cp=0.25, -->
+<!--       beta=NA,sigma=NA,Psi=NA,show.convergence=TRUE,CI=95) -->
+<!-- ``` -->
+
+
+## Modeling using LQmm package
+
+### Random intercept and slope
+
+```{r lqmm random }
+# Random slope model
+cost.lqmm2 <- lqmm( cum_cost ~  SHUNTRND + stage + sex + racet + insurance + ATRESIAn, random = ~ 1 + stage, group = blind_id,
+                    tau = c(0.5,0.75,0.9), data = costdata,  control = lqmmControl(method = "df", UP_max_iter = 800))
+summary(cost.lqmm2)
+```

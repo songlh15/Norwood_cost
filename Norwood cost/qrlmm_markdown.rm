@@ -1,0 +1,54 @@
+---
+title: "Cost_analysis"
+author: "Lihai"
+date: "2/9/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data preparation
+
+```{r setup, include=FALSE}
+library(data.table)
+library(table1)
+library(lqmm)
+library(qrLMM)
+
+cost <- fread("M:\\projects\\Lihai\\Jing\\Norwood\\data\\costdata.csv")
+attach(cost)
+```
+
+
+Trying using QRLMM packageds to run quantile regression mixed model: 
+
+```{r dataprepare }
+treat = c()
+treat[SHUNTRND=="1:MBTS"]=1
+treat[!SHUNTRND=="1:MBTS"]=2
+
+y = cum_cost #response
+x = cbind(1,treat,stage) #design matrix for fixed effects
+z = cbind(1,stage) #design matrix for random effects
+#A median regression
+# median_reg = QRLMM(y,x,z,blind_id,MaxIter = 500)
+
+```
+
+## Modeling
+```{r dataprepare }
+cost_qt <- QRLMM(y,x,z,blind_id,p=c(0.5,0.9),precision=0.001,MaxIter=100,M=10,cp=0.25,
+      beta=NA,sigma=NA,Psi=NA,show.convergence=TRUE,CI=95)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r plots, echo=FALSE}
+summary(cost_qt)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

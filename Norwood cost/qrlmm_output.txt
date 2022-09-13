@@ -1,0 +1,92 @@
+attach(cost)
+treat = c()
+treat[SHUNTRND=="1:MBTS"]=1
+treat[!SHUNTRND=="1:MBTS"]=2
+
+y = cum_cost #response
+x = cbind(1,treat,stage) #design matrix for fixed effects
+z = cbind(1,stage) #design matrix for random effects
+#A median regression
+# median_reg = QRLMM(y,x,z,blind_id,MaxIter = 500)
+cost_qt <- QRLMM(y,x,z,blind_id,p=c(0.5,0.9),precision=0.001,MaxIter=100,M=10,cp=0.25,
+      beta=NA,sigma=NA,Psi=NA,show.convergence=TRUE,CI=95)
+summary(cost_qt)
+
+
+
+
+
+---------------------------------------------------
+Quantile Regression for Linear Mixed Model
+---------------------------------------------------
+
+Quantile = 0.5 0.9
+Subjects = 276 ; Observations = 1312  
+
+-----------
+Estimates
+-----------
+
+- Fixed effects 
+
+        Estimate Std. Error Inf CI95% Sup CI95%  z value Pr(>|z|)
+beta 1 200191.93  26703.329 147853.41 252530.45  7.49689  0.00000
+beta 2  35476.39  10224.677  15436.03  55516.76  3.46968  0.00052
+beta 3 100420.05   5950.916  88756.26 112083.85 16.87472  0.00000
+
+sigma = 176840.8 
+
+Random effects Variance-Covariance Matrix matrix 
+        z1      z2
+z1 0.42773 0.21994
+z2 0.21994 0.59763
+
+------------------------
+Model selection criteria
+------------------------
+
+         Loglik      AIC      BIC       HQ
+Value -19026.37 38066.74 38102.99 38080.33
+
+-------
+Details
+-------
+
+Convergence reached? = FALSE
+Iterations = 100 / 100
+Criteria = 0.00191
+MC sample = 10
+Cut point = 0.25
+Processing time = 12.64105 mins
+
+---------------------------------------------------
+Quantile Regression for Linear Mixed Model
+---------------------------------------------------
+
+Quantile = 0.5 0.9
+Subjects = 276 ; Observations = 1312  
+
+-----------
+Estimates
+-----------
+
+- Fixed effects 
+
+       Estimate Std. Error Inf CI95% Sup CI95%  z value Pr(>|z|)
+beta 1 319626.4  32916.464  255110.1  384142.7  9.71023        0
+beta 2 357823.1  16919.029  324661.8  390984.4 21.14915        0
+beta 3 174204.8   7254.655  159985.7  188423.9 24.01283        0
+
+sigma = 144164.2 
+
+Random effects Variance-Covariance Matrix matrix 
+         z1       z2
+z1  0.41825 -0.10007
+z2 -0.10007  0.71374
+
+------------------------
+Model selection criteria
+------------------------
+
+         Loglik      AIC      BIC       HQ
+Value -20087.31 40188.63 40224.88 40202.22
